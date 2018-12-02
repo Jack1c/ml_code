@@ -14,6 +14,11 @@ def J(params, X, Y):
     return np.sum(((h(X, params) - Y) ** 2)) / (2 * m)
 
 
+def J_2(params, X, Y):
+    m = len(X)
+    return nd.sum(((h(X, params) - Y) ** 2)) / (2 * m)
+
+
 # 梯度下降
 def SGD(lr, params, X, Y):
     m = len(X)
@@ -22,23 +27,44 @@ def SGD(lr, params, X, Y):
     return np.array([tmp_0, tmp_1])
 
 
+def SGD2(lr, params):
+    for param in params:
+        param[:] = param - lr * param
+
+
 # 训练
 def train(X, Y, params, lr):
+    for param in params:
+        param.attach_grad()
     for i in range(100000):
-        params = SGD(lr, params, X, Y)
-        if(i % 10000 == 0):
-            print(J(params, X, Y))
+        with autograd.record():
+            l = J_2(params, X, Y)
+        l.backward()
+        params = SGD2(lr, params)
+
+        if (i % 10000 == 0):
+            print(J_2(params, X, Y))
     return params
+
+
+from mxnet import nd
+from mxnet import autograd
 
 
 def main():
     # 真是参数
     true_params = [2, -3.4]
 
-    X = np.random.rand(10000)
-    Y = h(X, true_params)
+    X = nd.random.normal(scale=1, shape=(1000,)).asnumpy()
+    Y = h(X, true_params) + nd.normal(scale=0.01, shape=(1000,)).asnumpy()
 
-    params = np.zeros(2)
+    X = nd.array(X.tolist())
+    Y = nd.array(Y.tolist())
+
+    params = nd.zeros(shape=(2,))
+
+
+
     lr = 0.001
     params = train(X, Y, params, lr)
     print("out put params :", params)
