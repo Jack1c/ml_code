@@ -53,8 +53,10 @@ from mxnet import autograd
 
 def main():
     # 真是参数
-    true_params = [2, -3.4]
+    true_params = nd.array([2])
+    true_b = nd.array([-3.14])
 
+    true_params = []
     X = nd.random.normal(scale=1, shape=(1000,)).asnumpy()
     Y = h(X, true_params) + nd.normal(scale=0.01, shape=(1000,)).asnumpy()
 
